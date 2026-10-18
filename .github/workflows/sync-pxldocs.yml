@@ -35,7 +35,7 @@ jobs:
       - name: Checkout Pixelate VS Code extension
         uses: actions/checkout@v4
         with:
-          repository: adilevy1011/Pixelate_vscode
+          repository: pixelate-lang/Pixelate_vscode
           ref: main
           path: vscode
           token: ${{ secrets.PIXELATE_VSCODE_TOKEN }}
