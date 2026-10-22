@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
     }
 
     if (argc == 2 && std::string(argv[1]) == "--version") {
-        std::cout << "Pixelate 0.0.1";
+        std::cout << "Pixelate 0.1.0";
         return 0;
     }
 
