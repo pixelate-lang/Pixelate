@@ -1,47 +1,24 @@
-window {
+window loops_window = window {
     title: "PXL Loops",
     width: 700,
     height: 460,
     background: 245 247 252,
 }
 
-script {
-    int count = 0;
-    int limit = 4;
+int count = 0;
+int limit = 4;
+label heading = label { text: "Loops", x: 40, y: 35, width: 620, height: 45, }
+label while_result = label { text: "The while loop has not run yet.", x: 40, y: 110, width: 620, height: 35, }
+label for_result = label { text: "The for loop has not run yet.", x: 40, y: 160, width: 620, height: 35, }
 
-    add label heading {
-        text: "Loops",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add label whileResult {
-        text: "The while loop has not run yet.",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    while (count < 2) {
-        count++;
-    }
-
-    whileResult.text = f"The while loop finished with count = {count}.";
-
-    add label forResult {
-        text: "The for loop has not run yet.",
-        x: 40,
-        y: 160,
-        width: 620,
-        height: 35,
-    }
-
-    for (int i = 0; i < limit; i++) {
-        forResult.text = f"The for loop is currently running at i = {i}.";
-    }
-
-    update forResult.text = "The for loop finished after four iterations.";
+while (count < 2) { count++; }
+while_result.text = f"The while loop finished with count = {count}.";
+for (int i = 0; i < limit; i++) {
+    for_result.text = f"The for loop is currently running at i = {i}.";
 }
+for_result.text = "The for loop finished after four iterations.";
+
+loops_window.add(heading);
+loops_window.add(while_result);
+loops_window.add(for_result);
+loops_window.run();

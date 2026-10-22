@@ -1,44 +1,31 @@
-window {
+window updates_window = window {
     title: "PXL Updates",
     width: 700,
     height: 460,
     background: 245 247 252,
 }
 
-script {
-    add label heading {
-        text: "Updating widgets and the window",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add label message {
-        text: "This label will be updated.",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    add button changeButton {
-        text: "Change everything",
-        x: 40,
-        y: 180,
-        width: 230,
-        height: 55,
-        onclick {
-            update message {
-                text: "The label, title, and background changed.",
-                x: 80,
-                y: 280,
-                width: 540,
-                height: 40,
-            }
-
-            update window.title = "The title was updated";
-            update window.background = 225 235 250;
-        }
+label heading = label { text: "Updating widgets and the window", x: 40, y: 35, width: 620, height: 45, }
+label message = label { text: "This label will be updated.", x: 40, y: 110, width: 620, height: 35, }
+label closing = label { text: "", x: 40, y: 340, width: 620, height: 35, }
+button change_button = button {
+    text: "Change everything", x: 40, y: 180, width: 230, height: 55,
+    onclick {
+        message.text = "The label, title, and background changed.";
+        message.x = 80; message.y = 280; message.width = 540; message.height = 40;
+        updates_window.title = "The title was updated";
+        updates_window.background = 225 235 250;
+        updates_window.update();
     }
 }
+trigger close = trigger(closeTrigger) {
+    closing.text = "Closing...";
+    updates_window.update();
+}
+
+updates_window.add(heading);
+updates_window.add(message);
+updates_window.add(closing);
+updates_window.add(change_button);
+updates_window.add(close);
+updates_window.run();

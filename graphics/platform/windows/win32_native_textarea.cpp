@@ -77,6 +77,10 @@ public:
         SendMessageW(edit_, WM_SETFONT, reinterpret_cast<WPARAM>(font_), TRUE);
     }
 
+    void setVisible(bool visible) override {
+        if (edit_) ShowWindow(edit_, visible ? SW_SHOW : SW_HIDE);
+    }
+
 private:
     void showPlaceholder() {
         if (!edit_ || placeholder_.empty() || showingPlaceholder_ ||

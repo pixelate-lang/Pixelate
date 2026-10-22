@@ -5,14 +5,15 @@
 #include <memory>
 #include <string>
 
-class NativeTextBox;
+class NativeTextArea;
 
-class TextBox : public Widget {
+class TextArea : public Widget {
 public:
-    explicit TextBox(std::wstring text);
-    ~TextBox() override;
+    explicit TextArea(std::wstring text);
+    ~TextArea() override;
 
     void attachToWindow(void* parent) override;
+    void setVisible(bool visible) override;
     void draw(DrawContext& context) override;
 
     void setText(std::wstring text);
@@ -23,7 +24,7 @@ protected:
     void syncNativeControl() override;
 
 private:
-    std::unique_ptr<NativeTextBox> nativeControl_;
+    std::unique_ptr<NativeTextArea> nativeControl_;
     std::wstring text_;
     std::wstring placeholder_;
 };

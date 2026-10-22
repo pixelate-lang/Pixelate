@@ -23,6 +23,7 @@ public:
     virtual std::wstring text() const = 0;
     virtual void setPlaceholder(const std::wstring& text) = 0;
     virtual void setTextStyle(const TextStyle& style) = 0;
+    virtual void setVisible(bool visible) = 0;
 };
 
 // The active platform supplies this factory. The current implementation is
@@ -46,6 +47,7 @@ public:
     virtual std::wstring text() const = 0;
     virtual void setPlaceholder(const std::wstring& text) = 0;
     virtual void setTextStyle(const TextStyle& style) = 0;
+    virtual void setVisible(bool visible) = 0;
 };
 
 std::unique_ptr<NativeTextArea> createNativeTextArea();

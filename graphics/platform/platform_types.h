@@ -26,16 +26,6 @@ struct TextStyle {
     int size = 16;
 };
 
-enum class CloseDialogOption {
-    YesNo
-};
-
-struct CloseTrigger {
-    bool enabled = false;
-    std::wstring message = L"Do you really want to exit?";
-    CloseDialogOption option = CloseDialogOption::YesNo;
-};
-
 enum class MouseShape {
     Arrow,
     IBeam,

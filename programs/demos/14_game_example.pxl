@@ -1,44 +1,12 @@
-window {
-    title: "Bab example",
-    background: 100 100 255,
-    width:1200,
-    height: 800,
-
-    label helloToBab {
-        text: "Hi bab!",
-        font: ARIAL,
-        fontSize: 20,
-        x: 30,
-        y:30,
-        width:200,
-    }
+window game_window = window {
+    title: "Game example", background: 100 100 255, width: 1200, height: 800,
 }
-
-script {
-    add triangle player {
-        p1: (300,320),
-        p2: (290,300),
-        p3: (280,320),
-    }
-
-    trigger(onkey("w")){
-        player.y = player.y -5;
-        helloToBab.text = "W is pressed";
-        player.angle = 0;
-    }
-    trigger(onkey("s")){
-        player.y = player.y +5;
-        helloToBab.text = "S is pressed";
-        player.angle = 180;
-    }
-    trigger(onkey("d")){
-        player.x = player.x + 5;
-        helloToBab.text = "D is pressed";
-        player.angle = 90;
-    }
-    trigger(onkey("a")){
-        player.x = player.x -5;
-        helloToBab.text = "A is pressed";
-        player.angle = 270;
-    }
-}
+label hello = label { text: "Hi!", font: ARIAL, fontSize: 20, x: 30, y: 30, width: 200, }
+triangle player = triangle { p1: (300, 320), p2: (290, 300), p3: (280, 320), }
+trigger key_w = trigger(onkey("w")) { player.y = player.y - 5; hello.text = "W is pressed"; player.angle = 0; game_window.update(); }
+trigger key_s = trigger(onkey("s")) { player.y = player.y + 5; hello.text = "S is pressed"; player.angle = 180; game_window.update(); }
+trigger key_d = trigger(onkey("d")) { player.x = player.x + 5; hello.text = "D is pressed"; player.angle = 90; game_window.update(); }
+trigger key_a = trigger(onkey("a")) { player.x = player.x - 5; hello.text = "A is pressed"; player.angle = 270; game_window.update(); }
+game_window.add(hello); game_window.add(player);
+game_window.add(key_w); game_window.add(key_s); game_window.add(key_d); game_window.add(key_a);
+game_window.run();

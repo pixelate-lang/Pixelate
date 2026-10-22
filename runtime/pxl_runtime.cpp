@@ -1,19 +1,22 @@
 #include "pxl_runtime.h"
 
 #include "../language/interpreter.h"
-#include "../window/app.h"
-#include "../window/ui/button.h"
-#include "../window/ui/label.h"
-#include "../window/ui/paragraph.h"
-#include "../window/ui/textbox.h"
-#include "../window/ui/textarea.h"
-#include "../window/ui/shape.h"
+#include "../graphics/app.h"
+#include "../graphics/ui/button.h"
+#include "../graphics/ui/label.h"
+#include "../graphics/ui/paragraph.h"
+#include "../graphics/ui/textbox.h"
+#include "../graphics/ui/textarea.h"
+#include "../graphics/ui/shape.h"
 
 #include <exception>
 #include <iostream>
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <cmath>
+#include <limits>
+#include <iomanip>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -58,6 +61,51 @@ void configureTextStyle(Widget& widget, const ElementNode& node) {
     widget.setTextStyle({fontFamilyFromName(node.font), node.fontSize});
 }
 
+std::string valueToString(const VariableValue& value) {
+    return std::visit([](const auto& item) {
+        using Type = std::decay_t<decltype(item)>;
+        if constexpr (std::is_same_v<Type, std::string>) {
+            return item;
+        } else if constexpr (std::is_same_v<Type, bool>) {
+            return item ? std::string("true") : std::string("false");
+        } else if constexpr (std::is_same_v<Type, char>) {
+            return std::string(1, item);
+        } else if constexpr (std::is_floating_point_v<Type>) {
+            std::ostringstream output;
+            output << std::setprecision(std::numeric_limits<Type>::max_digits10)
+                   << item;
+            std::string result = output.str();
+            if (result.find('.') == std::string::npos &&
+                result.find('e') == std::string::npos &&
+                result.find('E') == std::string::npos) {
+                result += ".0";
+            }
+            return result;
+        } else {
+            return std::to_string(item);
+        }
+    }, value);
+}
+
+bool isFloating(const VariableValue& value) {
+    return std::holds_alternative<float>(value) ||
+        std::holds_alternative<double>(value);
+}
+
+long double numericValue(const VariableValue& value) {
+    return std::visit([](const auto& item) -> long double {
+        using Type = std::decay_t<decltype(item)>;
+        if constexpr (std::is_same_v<Type, bool>) return item ? 1 : 0;
+        else if constexpr (std::is_same_v<Type, char>) {
+            return static_cast<unsigned char>(item);
+        } else if constexpr (std::is_arithmetic_v<Type>) {
+            return static_cast<long double>(item);
+        } else {
+            throw std::runtime_error("Expected a numeric value.");
+        }
+    }, value);
+}
+
 }
 
 VariableValue PxlRuntime::evaluateExpression(
@@ -71,40 +119,45 @@ VariableValue PxlRuntime::evaluateExpression(
             expression.arithmetic->right
         );
 
-        double leftNumber = 0.0;
-        double rightNumber = 0.0;
-        const bool numeric = std::visit([&](const auto& value) {
-            using Type = std::decay_t<decltype(value)>;
-            if constexpr (std::is_arithmetic_v<Type> &&
-                          !std::is_same_v<Type, bool>) {
-                leftNumber = static_cast<double>(value);
-                return true;
+        if (std::holds_alternative<std::string>(left) ||
+            std::holds_alternative<std::string>(right) ||
+            (std::holds_alternative<char>(left) &&
+             std::holds_alternative<char>(right) &&
+             expression.arithmetic->operation == '+')) {
+            if (expression.arithmetic->operation != '+') {
+                throw std::runtime_error("Only '+' is supported for strings.");
             }
-            return false;
-        }, left) && std::visit([&](const auto& value) {
-            using Type = std::decay_t<decltype(value)>;
-            if constexpr (std::is_arithmetic_v<Type> &&
-                          !std::is_same_v<Type, bool>) {
-                rightNumber = static_cast<double>(value);
-                return true;
-            }
-            return false;
-        }, right);
-
-        if (!numeric) {
-            throw std::runtime_error(
-                "Arithmetic expressions require numeric operands."
-            );
+            return valueToString(left) + valueToString(right);
         }
 
-        const bool integers = std::holds_alternative<int>(left) &&
-            std::holds_alternative<int>(right);
-        const double result = expression.arithmetic->operation == '-'
-            ? leftNumber - rightNumber
-            : leftNumber + rightNumber;
-        return integers
-            ? VariableValue{static_cast<int>(result)}
-            : VariableValue{result};
+        const long double leftNumber = numericValue(left);
+        const long double rightNumber = numericValue(right);
+        const char operation = expression.arithmetic->operation;
+        if ((operation == '/' || operation == '%') && rightNumber == 0) {
+            throw std::runtime_error("Division by zero.");
+        }
+
+        long double result = 0;
+        if (operation == '+') result = leftNumber + rightNumber;
+        else if (operation == '-') result = leftNumber - rightNumber;
+        else if (operation == '*') result = leftNumber * rightNumber;
+        else if (operation == '/') result = leftNumber / rightNumber;
+        else result = std::fmod(leftNumber, rightNumber);
+
+        if (isFloating(left) || isFloating(right)) {
+            const bool fitsFloat = std::isfinite(static_cast<double>(result)) &&
+                std::abs(result) <= std::numeric_limits<float>::max();
+            return fitsFloat && !std::holds_alternative<double>(left) &&
+                    !std::holds_alternative<double>(right)
+                ? VariableValue{static_cast<float>(result)}
+                : VariableValue{static_cast<double>(result)};
+        }
+
+        if (result >= std::numeric_limits<int>::min() &&
+            result <= std::numeric_limits<int>::max()) {
+            return VariableValue{static_cast<int>(result)};
+        }
+        return VariableValue{static_cast<long long>(result)};
     }
 
     if (expression.literal) {
@@ -281,19 +334,31 @@ void PxlRuntime::applyUpdateAction(const UpdateAction& action) {
         return;
     }
 
-    if (action.targetId == "window") {
-        if (!app_) return;
+    auto targetWindow = std::find_if(
+        views_.begin(),
+        views_.end(),
+        [&](const auto& view) { return view->id == action.targetId; }
+    );
+    if (action.targetId == "window" || targetWindow != views_.end()) {
+        App* targetApp = action.targetId == "window"
+            ? app_
+            : targetWindow->get()->app.get();
+        if (!targetApp) return;
 
         if (action.property == "title") {
             if (const auto* title = std::get_if<std::string>(&action.value)) {
-                app_->setTitle(widen(*title));
+                targetApp->setTitle(widen(*title));
             } else if (const auto* formatted =
                        std::get_if<UpdateAction::TextTemplate>(&action.value)) {
-                app_->setTitle(widen(renderText(*formatted)));
+                targetApp->setTitle(widen(renderText(*formatted)));
             }
         } else if (action.property == "background") {
             if (const auto* color = std::get_if<ColorNode>(&action.value)) {
-                app_->setBackgroundColor({color->red, color->green, color->blue});
+                targetApp->setBackgroundColor({
+                    color->red,
+                    color->green,
+                    color->blue
+                });
             }
         }
         return;
@@ -436,16 +501,18 @@ std::string PxlRuntime::renderText(
 }
 
 void PxlRuntime::fireMouseMoveTriggers() {
-    for (const auto& trigger : triggers_) {
-        if (trigger->mouseMove) {
+    if (!activeView_) return;
+    for (const auto& trigger : activeView_->triggers) {
+        if (trigger->attached && trigger->mouseMove) {
             executeStatements(trigger->body);
         }
     }
 }
 
 void PxlRuntime::fireKeyTriggers(const std::string& key) {
-    for (const auto& trigger : triggers_) {
-        if (!trigger->key) continue;
+    if (!activeView_) return;
+    for (const auto& trigger : activeView_->triggers) {
+        if (!trigger->attached || !trigger->key) continue;
         const std::string& expected = *trigger->key;
         bool matches = expected.size() == key.size();
         for (std::size_t index = 0; matches && index < key.size(); ++index) {
@@ -459,16 +526,25 @@ void PxlRuntime::fireKeyTriggers(const std::string& key) {
     }
 }
 
-void PxlRuntime::checkTriggers() {
-    for (std::size_t index = 0; index < triggers_.size(); ++index) {
-        const auto& trigger = triggers_[index];
-        if (trigger->mouseMove || trigger->key || !trigger->condition) continue;
-
-        const bool active = evaluateCondition(*trigger->condition);
-        if (active && !triggerStates_[index]) {
+void PxlRuntime::fireCloseTriggers() {
+    if (!activeView_) return;
+    for (const auto& trigger : activeView_->triggers) {
+        if (trigger->attached && trigger->closeTrigger) {
             executeStatements(trigger->body);
         }
-        triggerStates_[index] = active;
+    }
+}
+
+void PxlRuntime::checkTriggers() {
+    if (!activeView_) return;
+    for (const auto& trigger : activeView_->triggers) {
+        if (!trigger->attached || trigger->mouseMove || trigger->closeTrigger || trigger->key ||
+            !trigger->condition) continue;
+
+        const bool active = evaluateCondition(*trigger->condition);
+        if (active) {
+            executeStatements(trigger->body);
+        }
     }
 }
 
@@ -547,6 +623,29 @@ void PxlRuntime::executeStatement(const Statement& statement) {
         return;
     }
 
+    if (const auto* print = std::get_if<PrintStatement>(&statement.value)) {
+        std::string output;
+        if (print->formatted) {
+            for (const FormattedPart& part : print->parts) {
+                if (const auto* text = std::get_if<std::string>(&part.value)) {
+                    output += *text;
+                } else {
+                    output += valueToString(
+                        evaluateExpression(std::get<ValueExpression>(part.value))
+                    );
+                }
+            }
+        } else if (!print->parts.empty() || print->expression.literal ||
+                   !print->expression.variable.empty() ||
+                   print->expression.arithmetic) {
+            output = valueToString(evaluateExpression(print->expression));
+        }
+        std::cout << output;
+        if (print->newline) std::cout << '\n';
+        std::cout.flush();
+        return;
+    }
+
     if (const auto* assignment = std::get_if<VariableAssignment>(&statement.value)) {
         if (variables_.find(assignment->name) == variables_.end()) {
             throw std::runtime_error("Unknown variable: " + assignment->name);
@@ -557,13 +656,6 @@ void PxlRuntime::executeStatement(const Statement& statement) {
 
     if (const auto* update = std::get_if<UpdateAction>(&statement.value)) {
         applyUpdateAction(*update);
-        return;
-    }
-
-    if (const auto* updateBlock = std::get_if<UpdateBlock>(&statement.value)) {
-        for (const UpdateAction& action : updateBlock->actions) {
-            applyUpdateAction(action);
-        }
         return;
     }
 
@@ -582,8 +674,72 @@ void PxlRuntime::executeStatement(const Statement& statement) {
 
     if (const auto* switchStatement = std::get_if<SwitchViewStatement>(
             &statement.value)) {
-        switchView(*switchStatement);
+        switchView(switchStatement->windowId, true);
         return;
+    }
+
+    if (const auto* addStatement = std::get_if<AddViewStatement>(
+            &statement.value)) {
+        switchView(addStatement->windowId, false);
+        return;
+    }
+
+    if (const auto* updateWindow = std::get_if<WindowUpdateStatement>(
+            &statement.value)) {
+        auto view = std::find_if(
+            views_.begin(),
+            views_.end(),
+            [&](const auto& candidate) {
+                return candidate->id == updateWindow->windowId;
+            }
+        );
+        if (view == views_.end()) {
+            throw std::runtime_error(
+                "Unknown window object: " + updateWindow->windowId
+            );
+        }
+        view->get()->app->requestRedraw();
+        return;
+    }
+
+    if (const auto* object = std::get_if<WindowObjectStatement>(
+            &statement.value)) {
+        auto view = std::find_if(
+            views_.begin(),
+            views_.end(),
+            [&](const auto& candidate) {
+                return candidate->id == object->windowId;
+            }
+        );
+        if (view == views_.end()) {
+            throw std::runtime_error("Unknown window object: " + object->windowId);
+        }
+
+        auto element = view->get()->elements.find(object->objectId);
+        if (element != view->get()->elements.end()) {
+            element->second->setVisible(object->add);
+            if (view->get() == activeView_) {
+                app_ = view->get()->app.get();
+                app_->requestRedraw();
+            }
+            return;
+        }
+
+        auto trigger = std::find_if(
+            view->get()->triggers.begin(),
+            view->get()->triggers.end(),
+            [&](const auto& candidate) {
+                return candidate->id == object->objectId;
+            }
+        );
+        if (trigger != view->get()->triggers.end()) {
+            (*trigger)->attached = object->add;
+            return;
+        }
+
+        throw std::runtime_error(
+            "Object is not attached to window: " + object->objectId
+        );
     }
 
     if (const auto* ifStatement = std::get_if<std::shared_ptr<IfStatement>>(
@@ -656,21 +812,27 @@ void PxlRuntime::configureView(
         window.background.blue
     };
 
-    if (window.closeTrigger) {
-        options.closeTrigger.enabled = true;
-        options.closeTrigger.message = widen(
-            window.closeTrigger->message
-        );
-        options.closeTrigger.option = CloseDialogOption::YesNo;
-    }
-
     view.id = window.id;
     view.app = std::make_unique<App>(options);
     view.elements.clear();
+    view.triggers = window.triggers;
 
     activeView_ = &view;
     app_ = view.app.get();
     elements_.clear();
+
+    RuntimeView* viewPointer = &view;
+    view.app->setOnClose([this, viewPointer] {
+        try {
+            activeView_ = viewPointer;
+            app_ = viewPointer->app.get();
+            elements_ = viewPointer->elements;
+            fireCloseTriggers();
+            viewPointer->elements = elements_;
+        } catch (const std::exception& exception) {
+            reportRuntimeError(exception);
+        }
+    });
 
     for (const ElementNode& node : window.elements) {
         std::string elementText;
@@ -783,10 +945,6 @@ void PxlRuntime::configureView(
                     elements_ = viewPointer->elements;
                     executeStatements(actions);
                     viewPointer->elements = elements_;
-
-                    if (app_) {
-                        app_->requestRedraw();
-                    }
                 } catch (const std::exception& exception) {
                     reportRuntimeError(exception);
                 }
@@ -799,15 +957,15 @@ void PxlRuntime::configureView(
     view.elements = elements_;
 }
 
-void PxlRuntime::switchView(const SwitchViewStatement& statement) {
+void PxlRuntime::switchView(const std::string& windowId, bool destroyWindow) {
     auto target = std::find_if(
         views_.begin(),
         views_.end(),
-        [&](const auto& view) { return view->id == statement.windowId; }
+        [&](const auto& view) { return view->id == windowId; }
     );
 
     if (target == views_.end()) {
-        throw std::runtime_error("Unknown window id: " + statement.windowId);
+        throw std::runtime_error("Unknown window id: " + windowId);
     }
 
     RuntimeView* oldView = activeView_;
@@ -815,7 +973,7 @@ void PxlRuntime::switchView(const SwitchViewStatement& statement) {
 
     if (!newView->app->isCreated() && !newView->app->create()) {
         throw std::runtime_error(
-            "Could not recreate window: " + statement.windowId
+            "Could not recreate window: " + windowId
         );
     }
 
@@ -833,7 +991,7 @@ void PxlRuntime::switchView(const SwitchViewStatement& statement) {
     app_->setVisible(true);
     app_->requestRedraw();
 
-    if (oldView && oldView != newView && statement.destroyWindow) {
+    if (oldView && oldView != newView && destroyWindow) {
         oldView->app->close(false);
     }
 }
@@ -852,8 +1010,6 @@ bool PxlRuntime::loadFile(
         elements_.clear();
         variables_.clear();
         statements_.clear();
-        triggers_.clear();
-        triggerStates_.clear();
 
         for (const VariableDeclaration& variable : program.variables) {
             if (variables_.find(variable.name) != variables_.end()) {
@@ -871,23 +1027,34 @@ bool PxlRuntime::loadFile(
             views_.push_back(std::move(view));
         }
 
-        auto mainView = std::find_if(
-            views_.begin(),
-            views_.end(),
-            [](const auto& view) { return view->id == "main"; }
-        );
+        if (!views_.empty() && !program.entryWindow.empty()) {
+            auto entryView = std::find_if(
+                views_.begin(),
+                views_.end(),
+                [&](const auto& view) {
+                    return view->id == program.entryWindow;
+                }
+            );
 
-        if (mainView == views_.end()) {
-            mainView = views_.begin();
+            if (entryView == views_.end()) {
+                throw std::runtime_error(
+                    "Could not find entry window: " + program.entryWindow
+                );
+            }
+
+            activeView_ = entryView->get();
+            app_ = activeView_->app.get();
+            elements_ = activeView_->elements;
+        } else {
+            // Window declarations are only definitions until a .run() call
+            // selects one. Do not let configureView's temporary context make
+            // an unrun window look active to run().
+            activeView_ = nullptr;
+            app_ = nullptr;
+            elements_.clear();
         }
 
-        activeView_ = mainView->get();
-        app_ = activeView_->app.get();
-        elements_ = activeView_->elements;
-
         statements_ = std::move(program.statements);
-        triggers_ = std::move(program.triggers);
-        triggerStates_.assign(triggers_.size(), false);
         return true;
     } catch (const std::exception& exception) {
         error = exception.what();
@@ -897,15 +1064,19 @@ bool PxlRuntime::loadFile(
         elements_.clear();
         variables_.clear();
         statements_.clear();
-        triggers_.clear();
-        triggerStates_.clear();
         return false;
     }
 }
 
 int PxlRuntime::run() {
-    if (!app_) {
-        return 1;
+    if (views_.empty() || activeView_ == nullptr) {
+        try {
+            executeStatements(statements_);
+            return 0;
+        } catch (const std::exception& exception) {
+            reportRuntimeError(exception);
+            return 1;
+        }
     }
 
     for (auto& view : views_) {
@@ -920,7 +1091,6 @@ int PxlRuntime::run() {
                 elements_ = viewPointer->elements;
                 fireMouseMoveTriggers();
                 viewPointer->elements = elements_;
-                app_->requestRedraw();
             } catch (const std::exception& exception) {
                 reportRuntimeError(exception);
             }
@@ -932,7 +1102,6 @@ int PxlRuntime::run() {
                 elements_ = viewPointer->elements;
                 fireKeyTriggers(key);
                 viewPointer->elements = elements_;
-                app_->requestRedraw();
             } catch (const std::exception& exception) {
                 reportRuntimeError(exception);
             }
@@ -944,7 +1113,6 @@ int PxlRuntime::run() {
                 elements_ = viewPointer->elements;
                 checkTriggers();
                 viewPointer->elements = elements_;
-                app_->requestRedraw();
             } catch (const std::exception& exception) {
                 reportRuntimeError(exception);
             }
@@ -953,7 +1121,6 @@ int PxlRuntime::run() {
 
     try {
         executeStatements(statements_);
-        app_->requestRedraw();
     } catch (const std::exception& exception) {
         reportRuntimeError(exception);
         return 1;

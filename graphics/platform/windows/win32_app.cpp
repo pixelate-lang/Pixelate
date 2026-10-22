@@ -1,8 +1,8 @@
-#include "app.h"
+#include "../../app.h"
 #include <utility>
 #include <windows.h>
 #include <utility>
-#include "platform/windows/win32_draw_context.h"
+#include "win32_draw_context.h"
 #include "pixelate_resource.h"
 #include <windowsx.h>
 #include <cctype>
@@ -18,6 +18,7 @@ struct App::Impl {
     MouseMoveHandler mouseMoveHandler;
     TickHandler tickHandler;
     KeyDownHandler keyDownHandler;
+    CloseHandler closeHandler;
 
     ~Impl();
 
@@ -30,6 +31,7 @@ struct App::Impl {
     void setOnMouseMove(MouseMoveHandler handler);
     void setOnTick(TickHandler handler);
     void setOnKeyDown(KeyDownHandler handler);
+    void setOnClose(CloseHandler handler);
     void close(bool quitMessage);
 
     static LRESULT CALLBACK WindowProc(
@@ -109,6 +111,10 @@ void App::setOnTick(TickHandler handler) {
 
 void App::setOnKeyDown(KeyDownHandler handler) {
     impl_->setOnKeyDown(std::move(handler));
+}
+
+void App::setOnClose(CloseHandler handler) {
+    impl_->setOnClose(std::move(handler));
 }
 
 void App::close(bool quitMessage) {
@@ -195,6 +201,10 @@ void App::Impl::setOnTick(TickHandler handler) {
 
 void App::Impl::setOnKeyDown(KeyDownHandler handler) {
     keyDownHandler = std::move(handler);
+}
+
+void App::Impl::setOnClose(CloseHandler handler) {
+    closeHandler = std::move(handler);
 }
 
 void App::Impl::close(bool quitMessage) {
@@ -489,6 +499,7 @@ LRESULT App::Impl::handleMessage(
                 iterator != owner->elements_.rend();
                 ++iterator) {
                 Widget& element = **iterator;
+                if (!element.isVisible()) continue;
 
                 if (element.containsPoint(
                         cursorPosition.x,
@@ -524,6 +535,7 @@ LRESULT App::Impl::handleMessage(
                 iterator != owner->elements_.rend();
                 ++iterator) {
                 Widget& element = **iterator;
+                if (!element.isVisible()) continue;
 
                 if (element.onMouseDown(mouseX, mouseY)) {
                     InvalidateRect(hwnd, nullptr, FALSE);
@@ -575,6 +587,7 @@ LRESULT App::Impl::handleMessage(
 
                 Win32DrawContext context(bufferContext);
                 for (auto& element : owner->elements_) {
+                    if (!element->isVisible()) continue;
                     element->draw(context);
                 }
 
@@ -598,6 +611,7 @@ LRESULT App::Impl::handleMessage(
 
                 Win32DrawContext context(deviceContext);
                 for (auto& element : owner->elements_) {
+                    if (!element->isVisible()) continue;
                     element->draw(context);
                 }
             }
@@ -613,20 +627,8 @@ LRESULT App::Impl::handleMessage(
             return 0;
         }
         case WM_CLOSE:
-            if (!options.closeTrigger.enabled) {
-                DestroyWindow(hwnd);
-                return 0;
-            }
-
-            if (MessageBoxW(
-                    hwnd,
-                    options.closeTrigger.message.c_str(),
-                    L"Confirm",
-                    MB_YESNO | MB_ICONQUESTION
-                ) == IDYES) {
-                DestroyWindow(hwnd);
-            }
-
+            if (closeHandler) closeHandler();
+            DestroyWindow(hwnd);
             return 0;
 
         case WM_DESTROY:

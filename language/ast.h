@@ -69,6 +69,17 @@ struct VariableAssignment {
     ValueExpression value;
 };
 
+struct FormattedPart {
+    std::variant<std::string, ValueExpression> value;
+};
+
+struct PrintStatement {
+    bool newline = false;
+    bool formatted = false;
+    ValueExpression expression;
+    std::vector<FormattedPart> parts;
+};
+
 enum class ComparisonOperator {
     Equal,
     NotEqual,
@@ -104,11 +115,6 @@ struct UpdateAction {
     std::variant<int, std::string, ColorNode, TextTemplate, ValueExpression> value;
 };
 
-struct UpdateBlock {
-    std::string targetId;
-    std::vector<UpdateAction> actions;
-};
-
 struct Statement;
 
 struct IfStatement {
@@ -137,36 +143,50 @@ struct IncrementStatement {
 
 struct SwitchViewStatement {
     std::string windowId;
-    bool destroyWindow = true;
+};
+
+struct AddViewStatement {
+    std::string windowId;
 };
 
 struct TriggerStatement {
+    std::string id;
     bool mouseMove = false;
+    bool closeTrigger = false;
+    bool attached = true;
     std::optional<std::string> key;
     bool keyCaseInsensitive = false;
     std::optional<Condition> condition;
     std::vector<std::shared_ptr<Statement>> body;
 };
 
+struct WindowUpdateStatement {
+    std::string windowId;
+};
+
+struct WindowObjectStatement {
+    std::string windowId;
+    std::string objectId;
+    bool add = true;
+};
+
 struct Statement {
     std::variant<
         VariableDeclaration,
         VariableAssignment,
+        PrintStatement,
         UpdateAction,
-        UpdateBlock,
         IncrementStatement,
         SwitchViewStatement,
+        AddViewStatement,
+        WindowUpdateStatement,
+        WindowObjectStatement,
         std::shared_ptr<IfStatement>,
         std::shared_ptr<WhileStatement>,
         std::shared_ptr<ForStatement>,
         std::shared_ptr<TriggerStatement>
     > value;
     int line = 0;
-};
-
-struct CloseTriggerNode {
-    std::string message = "Do you really want to exit?";
-    std::string option = "YESNO";
 };
 
 struct ElementNode {
@@ -200,20 +220,15 @@ struct WindowNode {
     int height = 600;
     std::string iconPath = "pixelate.ico";
     ColorNode background;
-    std::optional<CloseTriggerNode> closeTrigger;
     std::vector<ElementNode> elements;
+    std::vector<std::shared_ptr<TriggerStatement>> triggers;
 };
 
 struct ProgramNode {
-    std::string title = "Pixelate App";
-    int width = 800;
-    int height = 600;
-    std::string iconPath = "pixelate.ico";
-    ColorNode background;
-    std::optional<CloseTriggerNode> closeTrigger;
     std::vector<VariableDeclaration> variables;
     std::vector<std::shared_ptr<Statement>> statements;
     std::vector<std::shared_ptr<TriggerStatement>> triggers;
     std::vector<ElementNode> elements;
     std::vector<WindowNode> windows;
+    std::string entryWindow;
 };

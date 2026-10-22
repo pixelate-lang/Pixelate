@@ -19,6 +19,8 @@ public:
     virtual void attachToWindow(void* parent) {
         (void)parent;
     }
+    virtual void setVisible(bool visible) { visible_ = visible; }
+    bool isVisible() const { return visible_; }
 
     void setPosition(int x, int y);
     void setSize(int width, int height);
@@ -44,4 +46,5 @@ protected:
     int width_ = 100;
     int height_ = 30;
     TextStyle textStyle_;
+    bool visible_ = true;
 };

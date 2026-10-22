@@ -1,0 +1,6 @@
+String name = "console";
+
+println("This program has no window.");
+println(f"Hello from the {name} demo.");
+println(1 + 2 * 3);
+println("done");

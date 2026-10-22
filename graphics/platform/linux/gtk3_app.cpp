@@ -21,6 +21,7 @@ struct App::Impl {
     MouseMoveHandler mouseMoveHandler;
     TickHandler tickHandler;
     KeyDownHandler keyDownHandler;
+    CloseHandler closeHandler;
 
     ~Impl();
 
@@ -33,6 +34,7 @@ struct App::Impl {
     void setOnMouseMove(MouseMoveHandler handler);
     void setOnTick(TickHandler handler);
     void setOnKeyDown(KeyDownHandler handler);
+    void setOnClose(CloseHandler handler);
     void close(bool quitMessage);
 
     static gboolean onDraw(GtkWidget*, cairo_t*, gpointer);
@@ -116,6 +118,7 @@ void App::setOnMouseMove(MouseMoveHandler handler) {
 }
 void App::setOnTick(TickHandler handler) { impl_->setOnTick(std::move(handler)); }
 void App::setOnKeyDown(KeyDownHandler handler) { impl_->setOnKeyDown(std::move(handler)); }
+void App::setOnClose(CloseHandler handler) { impl_->setOnClose(std::move(handler)); }
 void App::close(bool quitMessage) { impl_->close(quitMessage); }
 
 void App::setVisible(bool visible) {
@@ -150,6 +153,7 @@ void App::Impl::setOnMouseMove(MouseMoveHandler handler) {
 
 void App::Impl::setOnTick(TickHandler handler) { tickHandler = std::move(handler); }
 void App::Impl::setOnKeyDown(KeyDownHandler handler) { keyDownHandler = std::move(handler); }
+void App::Impl::setOnClose(CloseHandler handler) { closeHandler = std::move(handler); }
 
 void App::Impl::close(bool quitMessage) {
     if (!window) return;
@@ -210,7 +214,9 @@ gboolean App::Impl::onDraw(GtkWidget*, cairo_t* cairo, gpointer data) {
     cairo_paint(cairo);
 
     Gtk3DrawContext context(cairo);
-    for (auto& element : app->owner->elements_) element->draw(context);
+    for (auto& element : app->owner->elements_) {
+        if (element->isVisible()) element->draw(context);
+    }
     return FALSE;
 }
 
@@ -224,6 +230,7 @@ gboolean App::Impl::onButtonPress(
     for (auto iterator = app->owner->elements_.rbegin();
          iterator != app->owner->elements_.rend();
          ++iterator) {
+        if (!(*iterator)->isVisible()) continue;
         if ((*iterator)->onMouseDown(
                 static_cast<int>(event->x),
                 static_cast<int>(event->y))) {
@@ -281,19 +288,8 @@ gboolean App::Impl::onKeyPress(
 
 gboolean App::Impl::onDelete(GtkWidget*, GdkEvent*, gpointer data) {
     auto* app = static_cast<Impl*>(data);
-    if (!app->options.closeTrigger.enabled) return FALSE;
-
-    GtkWidget* dialog = gtk_message_dialog_new(
-        GTK_WINDOW(app->window),
-        GTK_DIALOG_MODAL,
-        GTK_MESSAGE_QUESTION,
-        GTK_BUTTONS_YES_NO,
-        "%s",
-        gtk3Utf8(app->options.closeTrigger.message).c_str()
-    );
-    gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
-    return response != GTK_RESPONSE_YES;
+    if (app->closeHandler) app->closeHandler();
+    return FALSE;
 }
 
 void App::Impl::onDestroy(GtkWidget*, gpointer data) {
@@ -323,6 +319,7 @@ void App::Impl::updateCursor(double x, double y) {
          iterator != owner->elements_.rend();
          ++iterator) {
         Widget& element = **iterator;
+        if (!element.isVisible()) continue;
         if (element.containsPoint(static_cast<int>(x), static_cast<int>(y))) {
             if (element.cursor() == CursorType::Hand) shape = MouseShape::Hand;
             break;

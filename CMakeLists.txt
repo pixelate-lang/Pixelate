@@ -34,15 +34,18 @@ set(PIXELATE_COMMON_SOURCES
     language/docs.cpp
     language/interpreter.cpp
     language/lexer.cpp
-    language/parser.cpp
+    language/parser/program.cpp
+    language/parser/elements.cpp
+    language/parser/updates.cpp
+    language/parser/statements.cpp
     runtime/pxl_runtime.cpp
-    window/ui/button.cpp
-    window/ui/label.cpp
-    window/ui/paragraph.cpp
-    window/ui/textarea.cpp
-    window/ui/textbox.cpp
-    window/ui/widget.cpp
-    window/ui/shape.cpp
+    graphics/ui/button.cpp
+    graphics/ui/label.cpp
+    graphics/ui/paragraph.cpp
+    graphics/ui/textarea.cpp
+    graphics/ui/textbox.cpp
+    graphics/ui/widget.cpp
+    graphics/ui/shape.cpp
     ${PIXELATE_EMBEDDED_PXLDOC_HEADER}
 )
 
@@ -58,29 +61,29 @@ target_include_directories(pixelate_core PUBLIC
 if(WIN32)
     add_executable(pixelate
         tools/pxl_main.cpp
-        window/app.cpp
-        window/platform/windows/win32_draw_context.cpp
-        window/platform/windows/win32_native_textbox.cpp
-        window/platform/windows/win32_native_textarea.cpp
-        window/pixelate.rc
+        graphics/platform/windows/win32_app.cpp
+        graphics/platform/windows/win32_draw_context.cpp
+        graphics/platform/windows/win32_native_textbox.cpp
+        graphics/platform/windows/win32_native_textarea.cpp
+        graphics/platform/windows/pixelate.rc
     )
 
     target_link_libraries(pixelate PRIVATE pixelate_core)
-    target_include_directories(pixelate PRIVATE window)
+    target_include_directories(pixelate PRIVATE graphics)
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 
     add_executable(pixelate
         tools/pxl_main.cpp
-        window/platform/linux/gtk3_app.cpp
-        window/platform/linux/gtk3_draw_context.cpp
-        window/platform/linux/gtk3_native_textbox.cpp
-        window/platform/linux/gtk3_native_textarea.cpp
+        graphics/platform/linux/gtk3_app.cpp
+        graphics/platform/linux/gtk3_draw_context.cpp
+        graphics/platform/linux/gtk3_native_textbox.cpp
+        graphics/platform/linux/gtk3_native_textarea.cpp
     )
 
     target_link_libraries(pixelate PRIVATE pixelate_core PkgConfig::GTK3)
-    target_include_directories(pixelate PRIVATE window)
+    target_include_directories(pixelate PRIVATE graphics)
 endif()
 
 if(BUILD_TESTING)
@@ -88,19 +91,22 @@ if(BUILD_TESTING)
         tests/parser_smoke.cpp
         language/interpreter.cpp
         language/lexer.cpp
-        language/parser.cpp
+        language/parser/program.cpp
+        language/parser/elements.cpp
+        language/parser/updates.cpp
+        language/parser/statements.cpp
     )
     target_include_directories(pixelate_parser_smoke PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     add_test(
         NAME pixelate_parse_demos
         COMMAND pixelate_parser_smoke
-            "${CMAKE_CURRENT_SOURCE_DIR}/programs/demos"
+            "${CMAKE_CURRENT_SOURCE_DIR}/programs/demos2"
     )
 endif()
 
 install(TARGETS pixelate RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
-    DIRECTORY programs/demos/
+    DIRECTORY programs/demos2/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/pixelate/programs/demos
     FILES_MATCHING PATTERN "*.pxl"
 )

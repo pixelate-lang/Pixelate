@@ -25,6 +25,7 @@ private:
         std::string id;
         std::unique_ptr<App> app;
         std::unordered_map<std::string, Widget*> elements;
+        std::vector<std::shared_ptr<TriggerStatement>> triggers;
     };
 
     VariableValue evaluateExpression(const ValueExpression& expression) const;
@@ -42,7 +43,8 @@ private:
     void checkTriggers();
     void fireMouseMoveTriggers();
     void fireKeyTriggers(const std::string& key);
-    void switchView(const SwitchViewStatement& statement);
+    void fireCloseTriggers();
+    void switchView(const std::string& windowId, bool destroyWindow);
     void configureView(RuntimeView& view, const WindowNode& window);
     void reportRuntimeError(const std::exception& exception) const;
 
@@ -52,7 +54,5 @@ private:
     std::unordered_map<std::string, Widget*> elements_;
     std::unordered_map<std::string, VariableValue> variables_;
     std::vector<std::shared_ptr<Statement>> statements_;
-    std::vector<std::shared_ptr<TriggerStatement>> triggers_;
-    std::vector<bool> triggerStates_;
     int currentLine_ = 0;
 };

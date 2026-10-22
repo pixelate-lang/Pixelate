@@ -1,53 +1,21 @@
-window {
-    id: "main",
-    title: "Main Window",
-    width: 700,
-    height: 460,
-    background: 245 247 252,
-
-    label heading {
-        text: "Multiple windows",
-        x: 40,
-        y: 40,
-        width: 620,
-        height: 40,
-    }
-
-    button openSettings {
-        text: "Open settings",
-        x: 40,
-        y: 130,
-        width: 220,
-        height: 55,
-        onclick {
-            switch_view("settings");
-        }
-    }
+window main_window = window {
+    title: "Main Window", width: 700, height: 460, background: 245 247 252,
 }
-
-window {
-    id: "settings",
-    title: "Settings Window",
-    width: 600,
-    height: 400,
-    background: 235 245 240,
-
-    label heading {
-        text: "Settings",
-        x: 40,
-        y: 40,
-        width: 500,
-        height: 40,
-    }
-
-    button keepMainOpen {
-        text: "Open main without closing this window",
-        x: 40,
-        y: 130,
-        width: 300,
-        height: 55,
-        onclick {
-            switch_view("main", destroy_window = false);
-        }
-    }
+window settings_window = window {
+    title: "Settings Window", width: 600, height: 400, background: 235 245 240,
 }
+label main_heading = label { text: "Multiple windows", x: 40, y: 40, width: 620, height: 40, }
+button open_settings = button {
+    text: "Open settings", x: 40, y: 130, width: 220, height: 55,
+    onclick { switch_view(settings_window); }
+}
+label settings_heading = label { text: "Settings", x: 40, y: 40, width: 500, height: 40, }
+button keep_main_open = button {
+    text: "Open main without closing this window", x: 40, y: 130, width: 300, height: 55,
+    onclick { add_view(main_window); }
+}
+main_window.add(main_heading);
+main_window.add(open_settings);
+settings_window.add(settings_heading);
+settings_window.add(keep_main_open);
+main_window.run();

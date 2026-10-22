@@ -1,53 +1,24 @@
-window {
-    title: "PXL TextBox",
-    width: 700,
-    height: 460,
-    background: 245 247 252,
+window textbox_window = window {
+    title: "PXL TextBox", width: 700, height: 460, background: 245 247 252,
 }
-
-script {
-    add label heading {
-        text: "Textbox input",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add textbox nameInput {
-        text: "",
-        placeholder: "Type your name here",
-        x: 30,
-        y: 100,
-        width: 360,
-        height: 32,
-    }
-
-    add textbox lastInput {
-        text: "",
-        placeholder: "Type your last name",
-        x: 30,
-        y: 140,
-        width: 360,
-        height:32
-    }
-
-    add label result {
-        text: "Your name will appear here.",
-        x: 40,
-        y: 175,
-        width: 620,
-        height: 35,
-    }
-
-    add button showButton {
-        text: "Read textbox",
-        x: 40,
-        y: 240,
-        width: 220,
-        height: 55,
-        onclick {
-            result.text = f"You entered: {nameInput.text}";
-        }
+label heading = label { text: "Textbox input", x: 40, y: 35, width: 620, height: 45, }
+textbox name_input = textbox {
+    text: "", placeholder: "Type your name here", x: 30, y: 100, width: 360, height: 32,
+}
+textbox last_input = textbox {
+    text: "", placeholder: "Type your last name", x: 30, y: 140, width: 360, height: 32,
+}
+label result = label { text: "Your name will appear here.", x: 40, y: 175, width: 620, height: 35, }
+button show_button = button {
+    text: "Read textbox", x: 40, y: 240, width: 220, height: 55,
+    onclick {
+        result.text = f"You entered: {name_input.text}";
+        textbox_window.update();
     }
 }
+textbox_window.add(heading);
+textbox_window.add(name_input);
+textbox_window.add(last_input);
+textbox_window.add(result);
+textbox_window.add(show_button);
+textbox_window.run();

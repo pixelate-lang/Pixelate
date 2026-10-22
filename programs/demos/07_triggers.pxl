@@ -1,41 +1,19 @@
-window {
-    title: "PXL Triggers",
-    width: 700,
-    height: 460,
-    background: 245 247 252,
+window triggers_window = window {
+    title: "PXL Triggers", width: 700, height: 460, background: 245 247 252,
 }
-
-script {
-    int count = 0;
-
-    add label heading {
-        text: "Live triggers",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add label status {
-        text: "The condition is not active yet.",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    add button activateButton {
-        text: "Activate condition",
-        x: 40,
-        y: 180,
-        width: 230,
-        height: 55,
-        onclick {
-            count = 1;
-        }
-    }
-
-    trigger(count == 1) {
-        status.text = "The trigger detected that count became 1.";
-    }
+int count = 0;
+label heading = label { text: "Live triggers", x: 40, y: 35, width: 620, height: 45, }
+label status = label { text: "The condition is not active yet.", x: 40, y: 110, width: 620, height: 35, }
+button activate_button = button {
+    text: "Activate condition", x: 40, y: 180, width: 230, height: 55,
+    onclick { count = 1; }
 }
+trigger count_trigger = trigger(count == 1) {
+    status.text = "The trigger detects that count is 1.";
+    triggers_window.update();
+}
+triggers_window.add(heading);
+triggers_window.add(status);
+triggers_window.add(activate_button);
+triggers_window.add(count_trigger);
+triggers_window.run();

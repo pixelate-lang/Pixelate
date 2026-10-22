@@ -40,7 +40,7 @@ ctest --test-dir build --output-on-failure
 On Windows, open PowerShell in the repository folder and run:
 
 ~~~powershell
-.\bin\pixelate.exe programs\demos\01_variables.pxl
+.\bin\pixelate.exe programs\demos2\01_example.pxl
 ~~~
 or add pixelate.exe to your path and run it simply with:
 ~~~powershell
@@ -49,7 +49,7 @@ pixelate yourProgram.pxl
 On Linux, run the CMake-built executable:
 
 ~~~bash
-./build/pixelate programs/demos/01_variables.pxl
+./build/pixelate programs/demos2/01_example.pxl
 ~~~
 
 You can run the other examples with the same platform-specific command.
@@ -59,22 +59,23 @@ You can run the other examples with the same platform-specific command.
 Create a file such as `programs/my_app.pxl`:
 
 ~~~pxl
-window {
+window my_window = window {
     title: "My First Pixelate App",
     width: 800,
     height: 600,
     background: 240 245 250,
 }
 
-script {
-    add label greeting {
+label greeting = label {
         text: "Hello from Pixelate!",
         x: 50,
         y: 50,
         width: 300,
         height: 40,
-    }
 }
+
+my_window.add(greeting);
+my_window.run();
 ~~~
 
 Run it with the appropriate command above. For Linux:
@@ -97,10 +98,10 @@ A VSCode extension for Pixelate is currently also under development in parallel 
 
 ## Project examples
 
-- `programs/demos/01_variables.pxl` through `11_fonts.pxl` demonstrate the
-  current language and UI features.
-- `programs/demos/09_multiple_windows.pxl` demonstrates identified windows
-  and `switch_view`.
+- `programs/demos2/01_example.pxl` demonstrates declarations, object
+  composition with `add`, and explicit window startup with `run`.
+- `programs/demos2/02_add_remove.pxl` demonstrates removing and re-adding
+  the same widget and trigger objects without destroying their declarations.
 
 Pixelate is under early development. Syntax, APIs, rendering, and platform
 behavior may change.

@@ -1,0 +1,8 @@
+window declared_but_not_run = window {
+    title: "This window is never shown",
+    width: 500,
+    height: 300,
+}
+
+println("A window can be declared without being run.");
+println("No GUI window is created for this program.");

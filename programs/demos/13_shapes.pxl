@@ -1,53 +1,17 @@
-window {
-    title: "Shape demo",
-    rect panel {
-        x: 50,
-        y: 30,
-        width: 200,
-        height: 100,
-        angle: 15,
-    }
-    circle cir {
-        x: 350,
-        y: 150,
-        radius: 40,
-    }
-    triangle marker {
-        p1: (500, 80),
-        p2: (580, 220),
-        p3: (420, 220),
-        angle: 20,
-    }
-}
-
-script {
-    trigger(onkey("up")) {
-        cir.radius++;
-    }
-
-    trigger(onkey("down")) {
-        cir.radius--;
-    }
-    trigger(onkey("left")){
-        panel.angle--;
-    }
-    trigger(onkey("right")){
-        panel.angle++;
-    }
-
-    trigger(onkeyci("w")){
-        marker.x++;
-    }
-    trigger(onkeyci("s")){
-        marker.y--;
-    }
-    trigger(onkeyci("d")){
-        marker.x++;
-    }
-    trigger(onkeyci("a")){
-        marker.x--;
-    }
-    trigger(onkey("space")){
-        update marker.angle = 45;
-    }
-}
+window shapes_window = window { title: "Shape demo", width: 700, height: 500, }
+rect panel = rect { x: 50, y: 30, width: 200, height: 100, angle: 15, }
+circle cir = circle { x: 350, y: 150, radius: 40, }
+triangle marker = triangle { p1: (500, 80), p2: (580, 220), p3: (420, 220), angle: 20, }
+trigger up = trigger(onkey("up")) { cir.radius++; shapes_window.update(); }
+trigger down = trigger(onkey("down")) { cir.radius--; shapes_window.update(); }
+trigger left = trigger(onkey("left")) { panel.angle--; shapes_window.update(); }
+trigger right = trigger(onkey("right")) { panel.angle++; shapes_window.update(); }
+trigger key_w = trigger(onkeyci("w")) { marker.y--; shapes_window.update(); }
+trigger key_s = trigger(onkeyci("s")) { marker.y++; shapes_window.update(); }
+trigger key_d = trigger(onkeyci("d")) { marker.x++; shapes_window.update(); }
+trigger key_a = trigger(onkeyci("a")) { marker.x--; shapes_window.update(); }
+trigger key_space = trigger(onkey("space")) { marker.angle = 45; shapes_window.update(); }
+shapes_window.add(panel); shapes_window.add(cir); shapes_window.add(marker);
+shapes_window.add(up); shapes_window.add(down); shapes_window.add(left); shapes_window.add(right);
+shapes_window.add(key_w); shapes_window.add(key_s); shapes_window.add(key_d); shapes_window.add(key_a); shapes_window.add(key_space);
+shapes_window.run();

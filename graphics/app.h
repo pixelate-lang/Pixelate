@@ -24,7 +24,6 @@ struct AppOptions {
     std::wstring iconPath = L"pixelate.ico";
     /**Window background color, with channels from 0 to 255*/
     AppColor backgroundColor{};
-    CloseTrigger closeTrigger{};
 };
 
 class App {
@@ -32,6 +31,7 @@ public:
     using MouseMoveHandler = std::function<void(MousePosition)>;
     using TickHandler = std::function<void()>;
     using KeyDownHandler = std::function<void(const std::string&)>;
+    using CloseHandler = std::function<void()>;
 
     explicit App(AppOptions options = {});
     ~App();
@@ -49,6 +49,7 @@ public:
     void setOnMouseMove(MouseMoveHandler handler);
     void setOnTick(TickHandler handler);
     void setOnKeyDown(KeyDownHandler handler);
+    void setOnClose(CloseHandler handler);
     void close(bool quitMessage = true);
     void setVisible(bool visible);
     bool isCreated() const;

@@ -1,6 +1,6 @@
-#include "../window/app.h"
-#include "../window/ui/button.h"
-#include "../window/ui/label.h"
+#include "../graphics/app.h"
+#include "../graphics/ui/button.h"
+#include "../graphics/ui/label.h"
 #include <memory>
 #include <utility>
 

@@ -1,0 +1,113 @@
+window first_window = window {
+    title: "Remove demo - first window",
+    width: 650,
+    height: 360,
+    background: 245 247 252,
+}
+
+window second_window = window {
+    title: "Remove demo - second window",
+    width: 650,
+    height: 440,
+    background: 235 245 240,
+}
+
+int activated = 0;
+
+label first_message = label {
+    text: "The shared label was removed from this window.",
+    x: 35,
+    y: 35,
+    width: 570,
+    height: 45,
+}
+
+label shared_label = label {
+    text: "I was removed from the first window and added to the second.",
+    x: 35,
+    y: 110,
+    width: 570,
+    height: 45,
+}
+
+button open_second = button {
+    text: "Open second window",
+    x: 35,
+    y: 190,
+    width: 220,
+    height: 50,
+    onclick {
+        switch_view(second_window);
+    }
+}
+
+label second_message = label {
+    text: "The same shared label is attached here.",
+    x: 35,
+    y: 35,
+    width: 570,
+    height: 45,
+}
+
+button activate_trigger = button {
+    text: "Activate trigger",
+    x: 300,
+    y: 190,
+    width: 180,
+    height: 50,
+    onclick {
+        activated = 1;
+    }
+}
+
+button remove_label = button {
+    text: "Remove label",
+    x: 35,
+    y: 190,
+    width: 220,
+    height: 50,
+    onclick {
+        second_window.remove(shared_label);
+    }
+}
+
+button restore_label = button {
+    text: "Add label back",
+    x: 35,
+    y: 260,
+    width: 220,
+    height: 50,
+    onclick {
+        second_window.add(shared_label);
+    }
+}
+
+label trigger_status = label {
+    text: "The trigger is waiting.",
+    x: 35,
+    y: 340,
+    width: 570,
+    height: 35,
+}
+
+trigger shared_trigger = trigger (activated == 1) {
+    trigger_status.text = "The trigger was removed and attached again successfully.";
+    second_window.update();
+}
+
+first_window.add(first_message);
+first_window.add(shared_label);
+first_window.remove(shared_label);
+first_window.add(open_second);
+
+second_window.add(second_message);
+second_window.add(shared_label);
+second_window.add(remove_label);
+second_window.add(restore_label);
+second_window.add(activate_trigger);
+second_window.add(shared_trigger);
+second_window.remove(shared_trigger);
+second_window.add(shared_trigger);
+second_window.add(trigger_status);
+
+first_window.run();

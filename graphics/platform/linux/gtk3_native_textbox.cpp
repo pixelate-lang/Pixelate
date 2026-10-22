@@ -60,6 +60,12 @@ public:
         gtk3ApplyFont(entry_, fontProvider_, style_);
     }
 
+    void setVisible(bool visible) override {
+        if (!entry_) return;
+        if (visible) gtk_widget_show(entry_);
+        else gtk_widget_hide(entry_);
+    }
+
 private:
     GtkWidget* entry_ = nullptr;
     std::wstring text_;

@@ -1,50 +1,23 @@
-window {
-    title: "PXL Mouse",
-    width: 700,
-    height: 460,
-    background: 245 247 252,
+window mouse_window = window {
+    title: "PXL Mouse", width: 700, height: 460, background: 245 247 252,
 }
-
-script {
-    add label heading {
-        text: "Mouse position and cursor shapes",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add label position {
-        text: "Move the mouse over the window.",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    add button handButton {
-        text: "Use hand cursor",
-        x: 40,
-        y: 190,
-        width: 220,
-        height: 55,
-        onclick {
-            update mouse.shape = HAND;
-        }
-    }
-
-    add button arrowButton {
-        text: "Use arrow cursor",
-        x: 300,
-        y: 190,
-        width: 220,
-        height: 55,
-        onclick {
-            update mouse.shape = ARROW;
-        }
-    }
-
-    trigger(mouseMove) {
-        position.text = f"Mouse position: X = {mouse.x}, Y = {mouse.y}";
-    }
+label heading = label { text: "Mouse position and cursor shapes", x: 40, y: 35, width: 620, height: 45, }
+label position = label { text: "Move the mouse over the window.", x: 40, y: 110, width: 620, height: 35, }
+button hand_button = button {
+    text: "Use hand cursor", x: 40, y: 190, width: 220, height: 55,
+    onclick { mouse.shape = HAND; mouse_window.update(); }
 }
+button arrow_button = button {
+    text: "Use arrow cursor", x: 300, y: 190, width: 220, height: 55,
+    onclick { mouse.shape = ARROW; mouse_window.update(); }
+}
+trigger mouse_trigger = trigger(mouseMove) {
+    position.text = f"Mouse position: X = {mouse.x}, Y = {mouse.y}";
+    mouse_window.update();
+}
+mouse_window.add(heading);
+mouse_window.add(position);
+mouse_window.add(hand_button);
+mouse_window.add(arrow_button);
+mouse_window.add(mouse_trigger);
+mouse_window.run();

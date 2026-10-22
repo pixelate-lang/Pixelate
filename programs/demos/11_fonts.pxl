@@ -1,87 +1,36 @@
-window {
-    title: "Fonts demo",
-
-    label greeting {
-        text: "Hey you!",
-        x:30,
-        y:50,
-        font: DEFAULT,
-        fontSize: 20
-    }
-
-    button changeToArial {
-        text: "Change the to Arial",
-        fontSize: 15,
-        x: 300,
-        y: 50,
-        width: 200,
-        height:30,
-        onclick{
-            greeting.font = ARIAL;
-        }
-    }
-    button changeToCALIBRI {
-        text: "Change the to CALIBRI",
-        fontSize: 15,
-        x: 300,
-        y: 150,
-        width: 200,
-        height:30,
-        onclick{
-            greeting.font = CALIBRI;
-        }
-    }
-    button changeToCONSOLAS {
-        text: "Change the to CONSOLAS",
-        fontSize: 15,
-        x: 300,
-        y: 250,
-        width: 200,
-        height:30,
-        onclick{
-            greeting.font = CONSOLAS;
-        }
-    }
-    button changeToCOURIERNEW {
-        text: "Change the to COURIERNEW",
-        fontSize: 15,
-        x: 300,
-        y: 350,
-        width: 200,
-        height:30,
-        onclick{
-            greeting.font = COURIERNEW;
-        }
-    }
-
-    label changeSize {
-        text: "Change the greeting size:",
-        x: 30,
-        y: 500,
-        width: 140,
-        fontSize: 12,
-
-    }
-    button IncreaseSize {
-        text: "Increase",
-        x: 170,
-        y: 500,
-        fontSize: 12,
-        onclick {
-            greeting.fontSize++;
-            greeting.width = greeting.width + 5;
-            greeting.height = greeting.height + 1;
-        }
-    }
-    button DecreaseSize {
-        text: "Decrease",
-        x: 270,
-        y: 500,
-        fontSize: 12,
-        onclick {
-            greeting.fontSize--;
-            greeting.width = greeting.width - 5;
-            greeting.height = greeting.height - 1;
-        }
-    }
+window fonts_window = window { title: "Fonts demo", width: 600, height: 600, }
+label greeting = label { text: "Hey you!", x: 30, y: 50, font: DEFAULT, fontSize: 20, }
+button change_arial = button {
+    text: "Change to Arial", fontSize: 15, x: 300, y: 50, width: 200, height: 30,
+    onclick { greeting.font = ARIAL; fonts_window.update(); }
 }
+button change_calibri = button {
+    text: "Change to Calibri", fontSize: 15, x: 300, y: 150, width: 200, height: 30,
+    onclick { greeting.font = CALIBRI; fonts_window.update(); }
+}
+button change_consolas = button {
+    text: "Change to Consolas", fontSize: 15, x: 300, y: 250, width: 200, height: 30,
+    onclick { greeting.font = CONSOLAS; fonts_window.update(); }
+}
+button change_courier = button {
+    text: "Change to Courier New", fontSize: 15, x: 300, y: 350, width: 200, height: 30,
+    onclick { greeting.font = COURIERNEW; fonts_window.update(); }
+}
+label change_size = label { text: "Change the greeting size:", x: 30, y: 500, width: 140, fontSize: 12, }
+button increase_size = button {
+    text: "Increase", x: 170, y: 500, fontSize: 12,
+    onclick { greeting.fontSize++; greeting.width = greeting.width + 5; greeting.height = greeting.height + 1; fonts_window.update(); }
+}
+button decrease_size = button {
+    text: "Decrease", x: 270, y: 500, fontSize: 12,
+    onclick { greeting.fontSize--; greeting.width = greeting.width - 5; greeting.height = greeting.height - 1; fonts_window.update(); }
+}
+fonts_window.add(greeting);
+fonts_window.add(change_arial);
+fonts_window.add(change_calibri);
+fonts_window.add(change_consolas);
+fonts_window.add(change_courier);
+fonts_window.add(change_size);
+fonts_window.add(increase_size);
+fonts_window.add(decrease_size);
+fonts_window.run();

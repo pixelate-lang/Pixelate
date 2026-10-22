@@ -1,47 +1,14 @@
-window {
-    title: "Triangle tester",
-    width: 700,
-    height: 500,
-
-    triangle defaultTriangle {
-        x: 520,
-        y: 100,
-    }
-
-    triangle placedTriangle {
-        x: 350,
-        y: 180,
-        p1: (0, -40),
-        p2: (-35, 30),
-        p3: (35, 30),
-        angle: 15,
-    }
+window triangle_window = window { title: "Triangle tester", width: 700, height: 500, }
+triangle default_triangle = triangle { x: 520, y: 100, }
+triangle placed_triangle = triangle {
+    x: 350, y: 180, p1: (0, -40), p2: (-35, 30), p3: (35, 30), angle: 15,
 }
-
-script {
-    add triangle movingTriangle {
-        p1: (500, 300),
-        p2: (550, 390),
-        p3: (450, 390),
-    }
-
-    trigger(onkey("left")) {
-        movingTriangle.x--;
-    }
-
-    trigger(onkey("right")) {
-        movingTriangle.x++;
-    }
-
-    trigger(onkey("up")) {
-        movingTriangle.y--;
-    }
-
-    trigger(onkey("down")) {
-        movingTriangle.y++;
-    }
-
-    trigger(onkey("space")) {
-        placedTriangle.angle = placedTriangle.angle + 45;
-    }
-}
+triangle moving_triangle = triangle { p1: (500, 300), p2: (550, 390), p3: (450, 390), }
+trigger key_left = trigger(onkey("left")) { moving_triangle.x--; triangle_window.update(); }
+trigger key_right = trigger(onkey("right")) { moving_triangle.x++; triangle_window.update(); }
+trigger key_up = trigger(onkey("up")) { moving_triangle.y--; triangle_window.update(); }
+trigger key_down = trigger(onkey("down")) { moving_triangle.y++; triangle_window.update(); }
+trigger key_space = trigger(onkey("space")) { placed_triangle.angle = placed_triangle.angle + 45; triangle_window.update(); }
+triangle_window.add(default_triangle); triangle_window.add(placed_triangle); triangle_window.add(moving_triangle);
+triangle_window.add(key_left); triangle_window.add(key_right); triangle_window.add(key_up); triangle_window.add(key_down); triangle_window.add(key_space);
+triangle_window.run();

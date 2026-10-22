@@ -296,6 +296,9 @@ std::vector<Token> Lexer::tokenize() const {
                 }
                 break;
             case '-': kind = TokenKind::Minus; break;
+            case '*': kind = TokenKind::Star; break;
+            case '/': kind = TokenKind::Slash; break;
+            case '%': kind = TokenKind::Percent; break;
             case '(': kind = TokenKind::OpenParen; break;
             case ')': kind = TokenKind::CloseParen; break;
             case ';': kind = TokenKind::Semicolon; break;

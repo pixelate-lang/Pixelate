@@ -24,6 +24,11 @@ void TextBox::attachToWindow(void* parent) {
     nativeControl_->setTextStyle(textStyle_);
 }
 
+void TextBox::setVisible(bool visible) {
+    Widget::setVisible(visible);
+    nativeControl_->setVisible(visible);
+}
+
 void TextBox::draw(DrawContext&) {
     // The platform textbox draws itself.
 }

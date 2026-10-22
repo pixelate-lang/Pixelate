@@ -2,49 +2,61 @@
 
 ## Button clicks
 
-Buttons support onclick blocks containing update actions.
+Buttons support onclick blocks containing property assignments. Call the
+window's `update()` method after changing state that should be redrawn.
 
 ~~~pxl
-add button clickMe {
+button clickMe = button {
     text: "Click me",
 
     onclick {
-        update greeting.text = "The button was clicked!";
-        update window.title = "Clicked";
+        greeting.text = "The button was clicked!";
+        my_window.title = "Clicked";
+        my_window.update();
     }
 }
+my_window.add(clickMe);
 ~~~
 
 ## Triggers
 
-A mouseMove trigger runs whenever the mouse moves.
+A trigger is a named object that must be attached to a window. Condition
+triggers run on every tick while their condition is true.
 
 ~~~pxl
-trigger(mouseMove) {
+trigger mouse_trigger = trigger (mouseMove) {
     mouseX.text = f"Mouse X: {mouse.x}";
     mouseY.text = f"Mouse Y: {mouse.y}";
+    my_window.update();
 }
+my_window.add(mouse_trigger);
 
 Keyboard triggers use `onkey("...")`. Named keys include `space`, `esc`, `enter`,
 `shift`, `alt`, `up`, `down`, `left`, `right`, and `tab`; one-character names
 match case-sensitively. Use `onkeyci` to listen for either case.
 
 ~~~pxl
-trigger(onkey("a")) {
-    update status.text = "a was pressed!";
+trigger key_trigger = trigger (onkey("a")) {
+        status.text = "a was pressed!";
+        my_window.update();
 }
+my_window.add(key_trigger);
 
-trigger(onkeyci("w")) {
-    update status.text = "w or W was pressed!";
+trigger insensitive_key_trigger = trigger (onkeyci("w")) {
+        status.text = "w or W was pressed!";
+        my_window.update();
 }
+my_window.add(insensitive_key_trigger);
 ~~~
 
-A condition trigger runs when a condition changes from false to true.
+A condition trigger runs on every tick while its condition is true.
 
 ~~~pxl
-trigger(count == 10) {
+trigger score_trigger = trigger (count == 10) {
     status.text = "Count reached ten.";
+    my_window.update();
 }
+my_window.add(score_trigger);
 ~~~
 
 ## Mouse position
@@ -56,7 +68,7 @@ mouse.x and mouse.y are read-only positions relative to the Pixelate window.
 Change the cursor with:
 
 ~~~pxl
-update mouse.shape = HAND;
+mouse.shape = HAND;
 ~~~
 
 Supported shapes:
@@ -69,16 +81,16 @@ NO, HAND, APPSTARTING, HELP, PIN, PERSON
 
 PIN and PERSON depend on cursor resources available on Windows.
 
-## Close confirmation
+## Close triggers
 
-Windows close immediately by default. Add a close trigger for a Yes/No dialog:
+Close behavior is an ordinary special trigger attached to a window. Its body
+runs when the user requests that window to close, before the window closes:
 
 ~~~pxl
-add CLOSE_TRIGGER {
-    message: "Do you want to close this app?",
-    options: YESNO,
+trigger close = trigger(closeTrigger) {
+    status.text = "Closing...";
+    my_window.update();
 }
+my_window.add(close);
 ~~~
-
-YESNO is currently the only supported option.
 

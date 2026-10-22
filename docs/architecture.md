@@ -5,31 +5,36 @@ backends.
 
 ## Platform-neutral layer
 
+Parser implementation is organized under `language/parser/`: `program.cpp`
+handles top-level blocks and declarations, `elements.cpp` handles UI elements,
+`updates.cpp` handles property updates, and `statements.cpp` handles
+expressions, conditions, control flow, and triggers.
+
 These parts should remain reusable across Windows, macOS, and Linux:
 
 - `runtime/` — executes PXL programs.
 - `language/` — lexer, parser, AST, and interpreter.
-- `window/ui/widget.h` — widget geometry, hit testing, and widget behavior.
-- `window/ui/label.*`, `window/ui/paragraph.*`, `window/ui/button.*`, `window/ui/textbox.*`, and `window/ui/textarea.*` — public widget implementations.
-- `window/ui/draw_context.h` — abstract drawing operations used by widgets.
-- `window/platform/platform_types.h` — platform-neutral colors, cursor names, and window options.
-- `window/platform/native_textbox.h` — the platform-neutral editable textbox and textarea contracts.
+- `graphics/ui/widget.h` — widget geometry, hit testing, and widget behavior.
+- `graphics/ui/label.*`, `graphics/ui/paragraph.*`, `graphics/ui/button.*`, `graphics/ui/textbox.*`, and `graphics/ui/textarea.*` — public widget implementations.
+- `graphics/ui/draw_context.h` — abstract drawing operations used by widgets.
+- `graphics/platform/platform_types.h` — platform-neutral colors, cursor names, and window options.
+- `graphics/platform/native_textbox.h` — the platform-neutral editable textbox and textarea contracts.
 
 The generic widgets do not need to know whether they are running on Win32,
 Cocoa, or X11/Wayland.
 
 ## Current platform backends
 
-Windows-specific code is under `window/platform/windows/`:
+Windows-specific code is under `graphics/platform/windows/`:
 
 - `win32_draw_context.*` implements drawing with GDI.
 - `win32_native_textbox.cpp` and `win32_native_textarea.cpp` implement native editable Windows controls.
 - `platform_types.h` contains shared widget text style and font-family values.
-- `window/app.cpp` currently contains the Win32 window/event-loop adapter.
+- `graphics/platform/windows/win32_app.cpp` contains the Win32 window/event-loop adapter.
 
 ### Linux (experimental)
 
-Linux support is under `window/platform/linux/`:
+Linux support is under `graphics/platform/linux/`:
 
 - `gtk3_app.cpp` implements the GTK 3 window and event-loop adapter.
 - `gtk3_draw_context.*` implements drawing with Cairo and Pango.

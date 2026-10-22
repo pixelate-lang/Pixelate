@@ -1,37 +1,25 @@
-window {
+window conditions_window = window {
     title: "PXL Conditions",
     width: 700,
     height: 420,
     background: 245 247 252,
 }
 
-script {
-    int score = 85;
-    bool passed = true;
+int score = 85;
+bool passed = true;
 
-    add label heading {
-        text: "Conditions",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
+label heading = label { text: "Conditions", x: 40, y: 35, width: 620, height: 45, }
+label result = label { text: "Checking score...", x: 40, y: 110, width: 620, height: 35, }
 
-    add label result {
-        text: "Checking score...",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    if (score >= 60) {
-        result.text = "The score is high enough to pass.";
-    } else {
-        result.text = "The score is too low to pass.";
-    }
-
-    if (passed) {
-        update result.text = "The score is high enough and passed is true.";
-    }
+if (score >= 60) {
+    result.text = "The score is high enough to pass.";
+} else {
+    result.text = "The score is too low to pass.";
 }
+if (passed) {
+    result.text = "The score is high enough and passed is true.";
+}
+
+conditions_window.add(heading);
+conditions_window.add(result);
+conditions_window.run();

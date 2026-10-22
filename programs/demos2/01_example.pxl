@@ -1,0 +1,62 @@
+window my_wind = window {
+    title: "Standard PXL Objects",
+    width: 700,
+    height: 420,
+    background: 245 247 252,
+}
+
+window my_wind2 = window {
+    title: "Second Window",
+    width: 500,
+    height: 300,
+}
+
+int score = 42;
+String player = "Pixel Player";
+
+label heading = label {
+    text: "Standard object syntax",
+    x: 40,
+    y: 35,
+    width: 620,
+    height: 45,
+}
+
+label values = label {
+    text: f"Player: {player} | score: {score}",
+    x: 40,
+    y: 110,
+    width: 620,
+    height: 35,
+}
+
+trigger refresh_values = trigger (score == 42) {
+    values.text = f"Player: {player} | score: {score}";
+    my_wind.update();
+}
+
+label second_heading = label {
+    text: "This is the second window",
+    x: 30,
+    y: 30,
+    width: 420,
+    height: 40,
+}
+
+button switch_button = button {
+    text: "Open second window",
+    x: 40,
+    y: 180,
+    width: 220,
+    height: 45,
+    onclick {
+        switch_view(my_wind2);
+    }
+}
+
+my_wind.add(heading);
+my_wind.add(values);
+my_wind.add(refresh_values);
+my_wind.add(switch_button);
+my_wind2.add(second_heading);
+my_wind.run();

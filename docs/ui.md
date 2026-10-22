@@ -2,7 +2,7 @@
 
 ## Window options
 
-The window block supports:
+The `window` constructor supports:
 
 | Property | Description |
 | --- | --- |
@@ -16,13 +16,14 @@ Defaults are 800x600, Pixelate App, pixelate.ico, and a white background. Place
 the default icon beside `pixelate.exe` when launching Pixelate from `PATH`.
 
 ~~~pxl
-window {
+window my_window = window {
     title: "My App",
     width: 900,
     height: 650,
     iconPath: "pixelate.ico",
     background: 245 247 252,
 }
+my_window.run();
 ~~~
 
 ## Labels, paragraphs, buttons, textboxes, and textareas
@@ -41,7 +42,7 @@ top-left of its bounds, honors explicit newlines, and wraps long lines.
 shows a vertical scrollbar when the content is taller than the control.
 
 ~~~pxl
-add label greeting {
+label greeting = label {
     text: "Hello!",
     x: 50,
     y: 50,
@@ -49,7 +50,7 @@ add label greeting {
     height: 40,
 }
 
-add button clickMe {
+button clickMe = button {
     text: "Click me",
     x: 50,
     y: 120,
@@ -57,7 +58,7 @@ add button clickMe {
     height: 50,
 }
 
-add textbox nameInput {
+textbox nameInput = textbox {
     text: "",
     placeholder: "Type here",
     x: 50,
@@ -66,7 +67,7 @@ add textbox nameInput {
     height: 30,
 }
 
-add textarea notesInput {
+textarea notesInput = textarea {
     text: "",
     placeholder: "Write notes...",
     x: 50,
@@ -74,6 +75,10 @@ add textarea notesInput {
     width: 400,
     height: 140,
 }
+my_window.add(greeting);
+my_window.add(clickMe);
+my_window.add(nameInput);
+my_window.add(notesInput);
 ~~~
 
 Text styling can be set in a widget declaration. Font names are translated by
@@ -81,7 +86,7 @@ each platform backend. On Linux, a requested Windows font may resolve to a
 system fallback if that font is not installed:
 
 ~~~pxl
-add par body {
+par body = par {
     text: "This paragraph uses Arial at 18 pixels.",
     font: ARIAL,
     fontSize: 18,
@@ -92,8 +97,8 @@ add par body {
 }
 ~~~
 
-It can also be changed at runtime with `update body.font = CONSOLAS;` or
-`update body.fontSize = 20;`.
+It can also be changed at runtime with `body.font = CONSOLAS;` or
+`body.fontSize = 20;`, followed by `my_window.update();`.
 
 The current font and size can be used in conditions:
 
@@ -112,14 +117,16 @@ Numeric font sizes can be incremented directly, for example
 
 They can also be decremented with `body.fontSize--;`.
 
-Widgets can be declared inside window or added inside script.
+Widgets are declared as objects and added to a window with `window.add(widget)`.
+Use `window.remove(widget)` to detach one without destroying its declaration;
+it can be added again later.
 
 Textboxes and textareas are editable while the program is running. The optional
 `placeholder` is shown while the control is empty and unfocused. Read the current
 contents with `textboxId.text` or `textareaId.text`, including inside an f-string:
 
 ~~~pxl
-add label result {
+label result = label {
     text: "Waiting for input...",
     x: 50,
     y: 240,
@@ -127,7 +134,7 @@ add label result {
     height: 35,
 }
 
-add button showInput {
+button showInput = button {
     text: "Show input",
     x: 50,
     y: 290,
@@ -137,6 +144,8 @@ add button showInput {
         result.text = f"You entered: {nameInput.text}";
     }
 }
+my_window.add(result);
+my_window.add(showInput);
 ~~~
 
 ## Updating properties
@@ -147,17 +156,16 @@ A single property does not need update:
 greeting.text = "New text";
 greeting.x = 100;
 greeting.width = 300;
-window.title = "New title";
+my_window.title = "New title";
 ~~~
 
-Use an update block to change several fields:
+Change several fields and commit them together with the window's `update()` method:
 
 ~~~pxl
-update greeting {
-    text: "Updated text",
-    x: 100,
-    y: 120,
-    width: 300,
-    height: 50,
-}
+greeting.text = "Updated text";
+greeting.x = 100;
+greeting.y = 120;
+greeting.width = 300;
+greeting.height = 50;
+my_window.update();
 ~~~

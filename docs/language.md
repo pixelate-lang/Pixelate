@@ -2,16 +2,22 @@
 
 ## Program structure
 
-Every program requires one window block and may contain a script block.
+Programs consist of declarations and statements. Windows and widgets are
+objects, and a program chooses its entry window explicitly with `run()`.
 
 ~~~pxl
-window {
+window my_window = window {
     title: "Example",
 }
 
-script {
-    # commands and declarations go here
+label greeting = label {
+    text: "Hello",
 }
+
+my_window.add(greeting);
+my_window.remove(greeting);
+my_window.add(greeting);
+my_window.run();
 ~~~
 
 Comments begin with #.
@@ -33,53 +39,55 @@ Shape coordinates can be changed or incremented with normal widget properties,
 for example `marker.x++`. For triangles, `x` and `y` translate all three points.
 
 ~~~pxl
-window {
-    rect panel {
-        x: 50,
-        y: 30,
-        width: 200,
-        height: 100,
-        angle: 90,
-    }
-
-    circle dot {
-        x: 300,
-        y: 150,
-        radius: 10,
-    }
-
-    triangle marker {
-        p1: (400, 100),
-        p2: (450, 200),
-        p3: (350, 200),
-    }
+window my_window = window {
+    title: "Shapes",
 }
+
+rect panel = rect {
+    x: 50,
+    y: 30,
+    width: 200,
+    height: 100,
+    angle: 90,
+}
+
+circle dot = circle {
+    x: 300,
+    y: 150,
+    radius: 10,
+}
+
+triangle marker = triangle {
+    p1: (400, 100),
+    p2: (450, 200),
+    p3: (350, 200),
+}
+my_window.add(panel);
+my_window.add(dot);
+my_window.add(marker);
+my_window.run();
 ~~~
 
 ## Multiple windows
 
-A single window may omit its id. If a file contains multiple windows, every
-window must have a unique string id. The window with id `main` is selected
-first; otherwise the first window is selected.
+A window name is a normal object identifier. Multiple windows can be declared,
+and exactly one must be selected with `windowName.run()`.
 
 ~~~pxl
-window {
-    id: "main",
+window main = window {
     title: "Main",
 }
 
-window {
-    id: "settings",
+window settings = window {
     title: "Settings",
 }
 ~~~
 
-Switch views from a script or button action. By default the old window is
-destroyed:
+Legacy top-level `script` and `window` blocks are not part of the language.
+Window selection is explicit:
 
 ~~~pxl
-switch_view("settings");
-switch_view("main", destroy_window = false);
+settings.run();
 ~~~
 
 ## Variables
@@ -119,7 +127,8 @@ Conditions can combine comparisons and boolean values with `&&` and `||`.
 
 ~~~pxl
 if (score >= 60 && (passed == true || bonus == true)) {
-    update status.text = "Passed";
+        status.text = "Passed";
+        my_window.update();
 }
 ~~~
 

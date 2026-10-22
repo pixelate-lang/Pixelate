@@ -1,0 +1,67 @@
+window print_demo = window {
+    title: "Print and expression rules",
+    width: 700,
+    height: 420,
+    background: 245 247 252,
+}
+
+String name = "Pixelate";
+char initial = 'P';
+bool enabled = true;
+
+label heading = label {
+    text: "Open the console to see the print demo output.",
+    x: 35,
+    y: 35,
+    width: 620,
+    height: 45,
+}
+
+label rules = label {
+    text: f"name={name} | initial={initial} | enabled={enabled}",
+    x: 35,
+    y: 110,
+    width: 620,
+    height: 40,
+}
+
+print_demo.add(heading);
+print_demo.add(rules);
+
+println();
+println("--- literals and basic output ---");
+print(1);
+println(1 + 3);
+println('c');
+println("hello world!");
+println(3.14);
+
+println("--- variables and formatted strings ---");
+println(f"Hello {name}");
+println("Hello " + name);
+println(f"{name} has length-independent interpolation");
+
+println("--- string concatenation ---");
+println("Hello " + 1 + 2);
+println(false + "Hello " + 'c' + 1 + 1.1);
+println("left" + 1 + false + 'x');
+
+println("--- numeric promotion ---");
+println(true + 1);
+println('b' + 1);
+println(1.5 + 1);
+println(1 + false + 2.5);
+println(1 + 2 * 3);
+println((1 + 2) * 3);
+println(17 % 5);
+
+println("--- print versus println ---");
+print("same line: ");
+print(1);
+println(" then a newline");
+
+if (enabled) {
+    println("print also works inside an if block");
+}
+
+#print_demo.run();

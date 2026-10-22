@@ -17,6 +17,11 @@ void TextArea::attachToWindow(void* parent) {
     nativeControl_->setTextStyle(textStyle_);
 }
 
+void TextArea::setVisible(bool visible) {
+    Widget::setVisible(visible);
+    nativeControl_->setVisible(visible);
+}
+
 void TextArea::draw(DrawContext&) {
     // The platform textarea draws itself.
 }

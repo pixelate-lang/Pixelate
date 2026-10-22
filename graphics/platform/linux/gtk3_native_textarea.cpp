@@ -108,6 +108,12 @@ public:
         gtk3ApplyFont(placeholderLabel_, placeholderFontProvider_, style_);
     }
 
+    void setVisible(bool visible) override {
+        if (!view_) return;
+        if (visible) gtk_widget_show(view_);
+        else gtk_widget_hide(view_);
+    }
+
 private:
     static void onBufferChanged(GtkTextBuffer*, gpointer data) {
         static_cast<Gtk3NativeTextArea*>(data)->updatePlaceholderVisibility();

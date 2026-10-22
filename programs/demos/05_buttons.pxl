@@ -1,46 +1,29 @@
-window {
-    title: "PXL Buttons",
-    width: 700,
-    height: 460,
-    background: 245 247 252,
+window buttons_window = window {
+    title: "PXL Buttons", width: 700, height: 460, background: 245 247 252,
 }
-
-script {
-    bool clicked = false;
-
-    add label status {
-        text: "Click a button.",
-        x: 40,
-        y: 45,
-        width: 620,
-        height: 40,
-    }
-
-    add button helloButton {
-        text: "Say hello",
-        x: 40,
-        y: 130,
-        width: 220,
-        height: 55,
-        onclick {
-            status.text = "Hello from a button action!";
-            clicked = true;
-        }
-    }
-
-    add button resetButton {
-        text: "Reset",
-        x: 300,
-        y: 130,
-        width: 220,
-        height: 55,
-        onclick {
-            if (clicked) {
-                status.text = "The button state was reset.";
-                clicked = false;
-            } else {
-                status.text = "Nothing needed resetting yet.";
-            }
-        }
+bool clicked = false;
+label status = label { text: "Click a button.", x: 40, y: 45, width: 620, height: 40, }
+button hello_button = button {
+    text: "Say hello", x: 40, y: 130, width: 220, height: 55,
+    onclick {
+        status.text = "Hello from a button action!";
+        clicked = true;
+        buttons_window.update();
     }
 }
+button reset_button = button {
+    text: "Reset", x: 300, y: 130, width: 220, height: 55,
+    onclick {
+        if (clicked) {
+            status.text = "The button state was reset.";
+            clicked = false;
+        } else {
+            status.text = "Nothing needed resetting yet.";
+        }
+        buttons_window.update();
+    }
+}
+buttons_window.add(status);
+buttons_window.add(hello_button);
+buttons_window.add(reset_button);
+buttons_window.run();

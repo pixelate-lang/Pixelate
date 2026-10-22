@@ -1,34 +1,15 @@
-window {
-    title: "Keyboard and Logic",
-    width: 600,
-    height: 300,
-
-    label status {
-        text: "Press a key",
-        x: 30,
-        y: 30,
-        width: 500,
-        height: 40,
-    }
+window keyboard_window = window { title: "Keyboard and Logic", width: 600, height: 300, }
+bool ready = true;
+bool alternate = false;
+label status = label { text: "Press a key", x: 30, y: 30, width: 500, height: 40, }
+trigger key_a = trigger(onkey("a")) { status.text = "a was pressed!"; keyboard_window.update(); }
+trigger key_w = trigger(onkeyci("w")) { status.text = "w or W was pressed!"; keyboard_window.update(); }
+trigger key_space = trigger(onkey("space")) { status.text = "space was pressed!"; keyboard_window.update(); }
+if (ready && (alternate == false || ready == true)) {
+    status.text = "Ready: press a, W, or space";
 }
-
-script {
-    bool ready = true;
-    bool alternate = false;
-
-    trigger(onkey("a")) {
-        update status.text = "a was pressed!";
-    }
-
-    trigger(onkeyci("w")) {
-        update status.text = "w or W was pressed!";
-    }
-
-    trigger(onkey("space")) {
-        update status.text = "space was pressed!";
-    }
-
-    if (ready && (alternate == false || ready == true)) {
-        update status.text = "Ready: press a, W, or space";
-    }
-}
+keyboard_window.add(status);
+keyboard_window.add(key_a);
+keyboard_window.add(key_w);
+keyboard_window.add(key_space);
+keyboard_window.run();

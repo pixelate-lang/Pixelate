@@ -1,38 +1,27 @@
-window {
+window variables_window = window {
     title: "PXL Variables",
     width: 700,
     height: 420,
     background: 245 247 252,
 }
 
-script {
-    int score = 42;
-    double progress = 0.75;
-    bool enabled = true;
-    char grade = 'A';
-    String player = "Pixel Player";
+int score = 42;
+double progress = 0.75;
+bool enabled = true;
+char grade = 'A';
+String player = "Pixel Player";
 
-    add label heading {
-        text: "Variables",
-        x: 40,
-        y: 35,
-        width: 620,
-        height: 45,
-    }
-
-    add label values {
-        text: f"Player: {player} | score: {score} | progress: {progress}",
-        x: 40,
-        y: 110,
-        width: 620,
-        height: 35,
-    }
-
-    add label moreValues {
-        text: f"enabled: {enabled} | grade: {grade}",
-        x: 40,
-        y: 160,
-        width: 620,
-        height: 35,
-    }
+label heading = label { 
+    text: "Variables", 
+    x: 40,
+    y: 35, 
+    width: 620,
+    height: 45
 }
+label values = label { text: f"Player: {player} | score: {score} | progress: {progress}", x: 40, y: 110, width: 620, height: 35, }
+label more_values = label { text: f"enabled: {enabled} | grade: {grade}", x: 40, y: 160, width: 620, height: 35, }
+
+variables_window.add(heading);
+variables_window.add(values);
+variables_window.add(more_values);
+variables_window.run();

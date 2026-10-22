@@ -1,47 +1,25 @@
-window {
-    title: "PXL TextArea",
-    width: 700,
-    height: 500,
+window textarea_window = window {
+    title: "PXL TextArea", width: 700, height: 500,
 }
-
-script {
-    add label prompt {
-        text: "Write something below:",
-        font: ARIAL,
-        fontSize: 18,
-        x: 40,
-        y: 35,
-        width: 300,
-        height: 30,
-    }
-
-    add textarea notes {
-        text: "",
-        placeholder: "Type multiple lines here...",
-        x: 40,
-        y: 80,
-        width: 500,
-        height: 120,
-    }
-
-    add par result {
-        text: "",
-        x: 40,
-        y: 220,
-        width: 600,
-        height: 100,
-    }
-
-    add button showNotes {
-        text: "Read textarea",
-        font: CONSOLAS,
-        fontSize: 14,
-        x: 40,
-        y: 390,
-        width: 180,
-        height: 45,
-        onclick {
-            result.text = f"Current text:\n{notes.text}";
-        }
+label prompt = label {
+    text: "Write something below:", font: ARIAL, fontSize: 18,
+    x: 40, y: 35, width: 300, height: 30,
+}
+textarea notes = textarea {
+    text: "", placeholder: "Type multiple lines here...",
+    x: 40, y: 80, width: 500, height: 120,
+}
+par result = par { text: "", x: 40, y: 220, width: 600, height: 100, }
+button show_notes = button {
+    text: "Read textarea", font: CONSOLAS, fontSize: 14,
+    x: 40, y: 390, width: 180, height: 45,
+    onclick {
+        result.text = f"Current text:\n{notes.text}";
+        textarea_window.update();
     }
 }
+textarea_window.add(prompt);
+textarea_window.add(notes);
+textarea_window.add(result);
+textarea_window.add(show_notes);
+textarea_window.run();
